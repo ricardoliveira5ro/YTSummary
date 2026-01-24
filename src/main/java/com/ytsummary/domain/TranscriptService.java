@@ -1,5 +1,7 @@
 package com.ytsummary.domain;
 
+import com.ytsummary.domain.model.Language;
+import com.ytsummary.domain.model.Transcript;
 import org.springframework.stereotype.Service;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -24,7 +26,7 @@ import java.util.regex.Pattern;
 @Service
 public class TranscriptService {
 
-    public String getTranscript(String ytUrl, String language) {
+    public Transcript getTranscript(String ytUrl, String language) {
         try {
             URI ytUri = URI.create(ytUrl);
             String query = ytUri.getQuery();
@@ -82,12 +84,16 @@ public class TranscriptService {
                 throw new RuntimeException("No captions found.");
 
             List<JSONObject> filteredTracks = new ArrayList<>();
+            Language trackLanguage = Language.EN;
 
             for (int i = 0; i < tracks.length(); i++) {
                 JSONObject track = tracks.getJSONObject(i);
 
-                if (language.equals(track.getString("languageCode")))
+                if (language.equals(track.getString("languageCode"))) {
                     filteredTracks.add(track);
+                    trackLanguage = Language.valueOf(track.getString("languageCode").toUpperCase());
+                    break;
+                }
             }
 
             JSONObject track = !filteredTracks.isEmpty() ?
@@ -118,7 +124,7 @@ public class TranscriptService {
                 }
             }
 
-            return transcript.toString();
+            return new Transcript(transcript.toString(), trackLanguage);
 
         } catch (IOException | InterruptedException | ParserConfigurationException | SAXException e) {
             throw new RuntimeException(e);
