@@ -1,6 +1,6 @@
 package com.ytsummary.api;
 
-import com.ytsummary.domain.TranscriptService;
+import com.ytsummary.domain.service.TranscriptService;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -28,6 +28,6 @@ public class YTSummaryController {
 
         String transcript = transcriptService.getTranscript(ytUrl, language);
 
-        return ResponseEntity.ok("OK");
+        return ResponseEntity.ok(transcript);
     }
 }

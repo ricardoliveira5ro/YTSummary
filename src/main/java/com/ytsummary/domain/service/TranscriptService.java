@@ -1,5 +1,9 @@
-package com.ytsummary.domain;
+package com.ytsummary.domain.service;
 
+import com.ytsummary.domain.model.Language;
+import com.ytsummary.domain.model.Transcript;
+import com.ytsummary.domain.port.TranscriptProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -24,7 +28,19 @@ import java.util.regex.Pattern;
 @Service
 public class TranscriptService {
 
+    private TranscriptProvider transcriptProvider;
+
+    @Autowired
+    public void setTranscriptProvider(TranscriptProvider transcriptProvider) {
+        this.transcriptProvider = transcriptProvider;
+    }
+
     public String getTranscript(String ytUrl, String language) {
+        return transcriptProvider.getTranscript(ytUrl, language);
+    }
+
+    // To be removed
+    public Transcript getTranscriptDeprecated(String ytUrl, String language) {
         try {
             URI ytUri = URI.create(ytUrl);
             String query = ytUri.getQuery();
@@ -82,12 +98,16 @@ public class TranscriptService {
                 throw new RuntimeException("No captions found.");
 
             List<JSONObject> filteredTracks = new ArrayList<>();
+            Language trackLanguage = Language.EN;
 
             for (int i = 0; i < tracks.length(); i++) {
                 JSONObject track = tracks.getJSONObject(i);
 
-                if (language.equals(track.getString("languageCode")))
+                if (language.equals(track.getString("languageCode"))) {
                     filteredTracks.add(track);
+                    trackLanguage = Language.valueOf(track.getString("languageCode").toUpperCase());
+                    break;
+                }
             }
 
             JSONObject track = !filteredTracks.isEmpty() ?
@@ -118,7 +138,7 @@ public class TranscriptService {
                 }
             }
 
-            return transcript.toString();
+            return new Transcript(transcript.toString(), trackLanguage);
 
         } catch (IOException | InterruptedException | ParserConfigurationException | SAXException e) {
             throw new RuntimeException(e);
