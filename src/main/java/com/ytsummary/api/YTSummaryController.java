@@ -1,7 +1,6 @@
 package com.ytsummary.api;
 
-import com.ytsummary.domain.TranscriptService;
-import com.ytsummary.domain.model.Transcript;
+import com.ytsummary.domain.service.TranscriptService;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -27,8 +26,8 @@ public class YTSummaryController {
         if (Strings.isBlank(ytUrl))
             return new ResponseEntity<>("Invalid URL", HttpStatus.BAD_REQUEST);
 
-        Transcript transcript = transcriptService.getTranscript(ytUrl, language);
+        String transcript = transcriptService.getTranscript(ytUrl, language);
 
-        return ResponseEntity.ok("OK");
+        return ResponseEntity.ok(transcript);
     }
 }

@@ -1,7 +1,9 @@
-package com.ytsummary.domain;
+package com.ytsummary.domain.service;
 
 import com.ytsummary.domain.model.Language;
 import com.ytsummary.domain.model.Transcript;
+import com.ytsummary.domain.port.TranscriptProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -26,7 +28,19 @@ import java.util.regex.Pattern;
 @Service
 public class TranscriptService {
 
-    public Transcript getTranscript(String ytUrl, String language) {
+    private TranscriptProvider transcriptProvider;
+
+    @Autowired
+    public void setTranscriptProvider(TranscriptProvider transcriptProvider) {
+        this.transcriptProvider = transcriptProvider;
+    }
+
+    public String getTranscript(String ytUrl, String language) {
+        return transcriptProvider.getTranscript(ytUrl, language);
+    }
+
+    // To be removed
+    public Transcript getTranscriptDeprecated(String ytUrl, String language) {
         try {
             URI ytUri = URI.create(ytUrl);
             String query = ytUri.getQuery();
