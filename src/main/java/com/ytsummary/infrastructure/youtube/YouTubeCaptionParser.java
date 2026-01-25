@@ -1,5 +1,6 @@
 package com.ytsummary.infrastructure.youtube;
 
+import com.ytsummary.exception.TranscriptNotFoundException;
 import org.apache.commons.text.StringEscapeUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -14,7 +15,7 @@ import java.io.StringReader;
 @Component
 public class YouTubeCaptionParser {
 
-    public JSONObject extractTrack(String playerResponse) {
+    public JSONObject parseTrack(String playerResponse) {
         JSONObject root = new JSONObject(playerResponse);
         JSONArray tracks = root
                 .getJSONObject("captions")
@@ -22,7 +23,7 @@ public class YouTubeCaptionParser {
                 .getJSONArray("captionTracks");
 
         if (tracks == null || tracks.isEmpty())
-            throw new RuntimeException("No captions found.");
+            throw new TranscriptNotFoundException("No captions found.");
 
         for (int i = 0; i < tracks.length(); i++) {
             JSONObject track = tracks.getJSONObject(i);

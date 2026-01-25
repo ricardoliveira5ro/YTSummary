@@ -22,7 +22,7 @@ public class YouTubeTranscriptProvider implements TranscriptProvider {
 
         String playerResponse = client.fetchPlayerData(apiKey, videoId);
 
-        JSONObject track = captionParser.extractTrack(playerResponse);
+        JSONObject track = captionParser.parseTrack(playerResponse);
         String captionsUrl = captionParser.parseCaptionsUrl(track);
         String captionsXml = client.fetchCaptions(captionsUrl);
         String captions = captionParser.parseCaptions(captionsXml);
