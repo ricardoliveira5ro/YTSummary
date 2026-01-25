@@ -14,8 +14,8 @@ import java.io.StringReader;
 @Component
 public class YouTubeCaptionParser {
 
-    public String parseCaptionsUrl(String playerJson, String language) {
-        JSONObject root = new JSONObject(playerJson);
+    public JSONObject extractTrack(String playerResponse) {
+        JSONObject root = new JSONObject(playerResponse);
         JSONArray tracks = root
                 .getJSONObject("captions")
                 .getJSONObject("playerCaptionsTracklistRenderer")
@@ -24,20 +24,18 @@ public class YouTubeCaptionParser {
         if (tracks == null || tracks.isEmpty())
             throw new RuntimeException("No captions found.");
 
-        JSONObject selected = null;
-
         for (int i = 0; i < tracks.length(); i++) {
             JSONObject track = tracks.getJSONObject(i);
-            if (language.equals(track.getString("languageCode"))) {
-                selected = track;
-                break;
+            if ("en".equals(track.getString("languageCode"))) {
+                return track;
             }
         }
 
-        if (selected == null)
-            selected = tracks.getJSONObject(0);
+        return tracks.getJSONObject(0);
+    }
 
-        return selected.getString("baseUrl").replaceAll("&fmt=\\w+$", "");
+    public String parseCaptionsUrl(JSONObject track) {
+        return track.getString("baseUrl").replaceAll("&fmt=\\w+$", "");
     }
 
     public String parseCaptions(String xml) {

@@ -1,6 +1,8 @@
 package com.ytsummary.infrastructure.youtube;
 
+import com.ytsummary.domain.model.Transcript;
 import com.ytsummary.domain.port.TranscriptProvider;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -12,17 +14,20 @@ public class YouTubeTranscriptProvider implements TranscriptProvider {
     private YouTubeCaptionParser captionParser;
 
     @Override
-    public String getTranscript(String ytUrl, String language) {
+    public Transcript getTranscript(String ytUrl) {
         String html = client.fetchVideo(ytUrl);
 
         String apiKey = htmlParser.parseApiKey(html);
         String videoId = htmlParser.parseVideoId(ytUrl);
 
         String playerResponse = client.fetchPlayerData(apiKey, videoId);
-        String captionsUrl = captionParser.parseCaptionsUrl(playerResponse, language);
-        String captionsXml = client.fetchCaptions(captionsUrl);
 
-        return captionParser.parseCaptions(captionsXml);
+        JSONObject track = captionParser.extractTrack(playerResponse);
+        String captionsUrl = captionParser.parseCaptionsUrl(track);
+        String captionsXml = client.fetchCaptions(captionsUrl);
+        String captions = captionParser.parseCaptions(captionsXml);
+
+        return new Transcript(captions, track.getString("languageCode"));
     }
 
     @Autowired

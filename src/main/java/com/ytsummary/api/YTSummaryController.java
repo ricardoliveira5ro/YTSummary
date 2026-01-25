@@ -1,5 +1,6 @@
 package com.ytsummary.api;
 
+import com.ytsummary.domain.model.Transcript;
 import com.ytsummary.domain.service.TranscriptService;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,12 +23,12 @@ public class YTSummaryController {
     }
 
     @PostMapping("/summarize")
-    public ResponseEntity<String> summarize(@RequestParam(name = "ytUrl") String ytUrl, @RequestParam(name = "lang", defaultValue = "en") String language) {
+    public ResponseEntity<String> summarize(@RequestParam(name = "ytUrl") String ytUrl) {
         if (Strings.isBlank(ytUrl))
             return new ResponseEntity<>("Invalid URL", HttpStatus.BAD_REQUEST);
 
-        String transcript = transcriptService.getTranscript(ytUrl, language);
+        Transcript transcript = transcriptService.getTranscript(ytUrl);
 
-        return ResponseEntity.ok(transcript);
+        return ResponseEntity.ok(transcript.content());
     }
 }
