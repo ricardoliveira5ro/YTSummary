@@ -1,6 +1,8 @@
 package com.ytsummary.domain.port;
 
+import com.ytsummary.domain.model.Transcript;
+
 public interface TranscriptProvider {
 
-    String getTranscript(String ytUrl, String language);
+    Transcript getTranscript(String ytUrl);
 }

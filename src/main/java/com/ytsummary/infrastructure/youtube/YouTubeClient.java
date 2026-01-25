@@ -1,5 +1,6 @@
 package com.ytsummary.infrastructure.youtube;
 
+import com.ytsummary.exception.YoutubeException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -56,12 +57,11 @@ public class YouTubeClient {
 
     private String invokeRequest(HttpRequest request) {
         try {
-            HttpResponse<String> response =
-                    httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
-            if (response.statusCode() >= 400) {
-                throw new RuntimeException("YouTube request failed: " + response.statusCode());
-            }
+            if (response.statusCode() >= 400)
+                throw new YoutubeException("YouTube request failed: " + response.statusCode());
+
             return response.body();
         } catch (Exception e) {
             throw new RuntimeException("HTTP call failed", e);
