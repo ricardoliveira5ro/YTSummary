@@ -29,6 +29,8 @@ public class YTSummaryController {
 
         Transcript transcript = transcriptService.getTranscript(ytUrl);
 
+        // Summarizer Service
+
         return ResponseEntity.ok(transcript.content());
     }
 }
