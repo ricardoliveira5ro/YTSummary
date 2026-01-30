@@ -1,6 +1,7 @@
 package com.ytsummary.api;
 
 import com.ytsummary.domain.model.Transcript;
+import com.ytsummary.domain.service.SummaryService;
 import com.ytsummary.domain.service.TranscriptService;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,10 +17,16 @@ import org.springframework.web.bind.annotation.RestController;
 public class YTSummaryController {
 
     private TranscriptService transcriptService;
+    private SummaryService summaryService;
 
     @Autowired
     public void setTranscriptService(TranscriptService transcriptService) {
         this.transcriptService = transcriptService;
+    }
+
+    @Autowired
+    public void setSummaryService(SummaryService summaryService) {
+        this.summaryService = summaryService;
     }
 
     @PostMapping("/summarize")
@@ -29,8 +36,8 @@ public class YTSummaryController {
 
         Transcript transcript = transcriptService.getTranscript(ytUrl);
 
-        // Summarizer Service
+        String summary = summaryService.getSummary(transcript.content());
 
-        return ResponseEntity.ok(transcript.content());
+        return ResponseEntity.ok(summary);
     }
 }
