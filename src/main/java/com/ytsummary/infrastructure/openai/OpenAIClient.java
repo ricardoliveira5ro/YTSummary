@@ -30,8 +30,7 @@ public class OpenAIClient {
     public String fetchPromptRequest(String transcript) {
         JSONObject payload = new JSONObject()
                 .put("model", openAIApiModel)
-                .put("input", "This is a transcript from a youtube video, I want you to summarize it to understand what they are talking about without having to watch the whole video. " +
-                        "Please very concise and include any useful details and return only the summary and in plain text as paragraphs. Here is the transcript: `" + transcript + "`");
+                .put("input", getPrompt(transcript));
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create("https://api.openai.com/v1/responses"))
@@ -54,5 +53,49 @@ public class OpenAIClient {
         } catch (Exception e) {
             throw new RuntimeException("HTTP call failed", e);
         }
+    }
+
+    private String getPrompt(String transcript) {
+        return """
+            You are an intelligent content analysis system.
+            
+            TASK:
+            Analyze the following YouTube transcript and extract only the information that is important for understanding the video without watching it.
+            
+            OBJECTIVE:
+            Produce a concise, high-signal summary focused on meaning, not narration.
+            
+            INCLUDE:
+            - Core topic(s)
+            - Main arguments or ideas
+            - Key insights or conclusions
+            - Important facts, data, or claims
+            - Actionable takeaways (if any)
+            - Definitions of critical concepts (if introduced)
+            - Decisions, recommendations, or opinions expressed by the speaker
+            
+            EXCLUDE:
+            - Filler words, repetition, greetings, jokes, banter
+            - Sponsor messages, ads, promotions
+            - Personal anecdotes unless essential to the message
+            - Tangents or off-topic discussion
+            - Redundant explanations
+            
+            RULES:
+            - Do NOT invent information
+            - Do NOT assume missing context
+            - Do NOT summarize emotions or tone
+            - Do NOT refer to the transcript itself
+            - Do NOT include timestamps
+            - Do NOT include formatting symbols, bullets, or markdown
+            
+            OUTPUT FORMAT:
+            Plain text only.
+            Structured as short, clear paragraphs.
+            Each paragraph should represent one main idea.
+            Be concise, dense, and information-focused.
+            
+            TRANSCRIPT:
+            """ + transcript;
     }
 }
