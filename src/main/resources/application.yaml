@@ -3,3 +3,4 @@ spring:
     name: ytsummary
 openai:
   api-token: ${OPENAI_API_TOKEN}
+  api-model: ${OPENAI_API_MODEL}

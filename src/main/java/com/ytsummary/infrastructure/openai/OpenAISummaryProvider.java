@@ -1,6 +1,7 @@
 package com.ytsummary.infrastructure.openai;
 
 import com.ytsummary.domain.port.SummaryProvider;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,6 +21,9 @@ public class OpenAISummaryProvider implements SummaryProvider {
     @Value("${openai.api-token}")
     private String openAIApiToken;
 
+    @Value("${openai.api-model}")
+    private String openAIApiModel;
+
     @Autowired
     public void setHttpClient(HttpClient httpClient) {
         this.httpClient = httpClient;
@@ -28,7 +32,7 @@ public class OpenAISummaryProvider implements SummaryProvider {
     @Override
     public String getSummary(String transcript) {
         JSONObject payload = new JSONObject()
-                .put("model", "gpt-4.1-nano")
+                .put("model", openAIApiModel)
                 .put("input", "This is a transcript from a youtube video, I want you to summarize it to understand what they are talking about without having to watch the whole video. " +
                         "Please very concise and include any useful details and return only the summary and in plain text as paragraphs. Here is the transcript: `" + transcript + "`");
 
@@ -42,7 +46,16 @@ public class OpenAISummaryProvider implements SummaryProvider {
         // To be parsed
         String result = invokeRequest(request);
 
-        return "";
+        JSONObject root = new JSONObject(result);
+        JSONObject output = root.getJSONArray("output").getJSONObject(0);
+
+        if (!output.getString("status").equalsIgnoreCase("completed")) {
+            throw new RuntimeException("Prompt not completed");
+        }
+
+        JSONArray content = output.getJSONArray("content");
+
+        return content.getJSONObject(0).getString("text");
     }
 
     private String invokeRequest(HttpRequest request) {
