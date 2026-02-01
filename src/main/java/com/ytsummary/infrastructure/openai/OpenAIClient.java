@@ -1,5 +1,7 @@
 package com.ytsummary.infrastructure.openai;
 
+import com.ytsummary.domain.model.Transcript;
+import com.ytsummary.exception.OpenAIException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,7 +29,7 @@ public class OpenAIClient {
         this.httpClient = httpClient;
     }
 
-    public String fetchPromptRequest(String transcript) {
+    public String fetchPromptRequest(Transcript transcript) {
         JSONObject payload = new JSONObject()
                 .put("model", openAIApiModel)
                 .put("input", getPrompt(transcript));
@@ -47,7 +49,7 @@ public class OpenAIClient {
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() >= 400)
-                throw new RuntimeException("Something went wrong");
+                throw new OpenAIException("YouTube request failed: " + response.statusCode());
 
             return response.body();
         } catch (Exception e) {
@@ -55,15 +57,25 @@ public class OpenAIClient {
         }
     }
 
-    private String getPrompt(String transcript) {
+    private String getPrompt(Transcript transcript) {
         return """
             You are an intelligent content analysis system.
+            
+            LANGUAGE CONTEXT:
+            - The transcript language is: %s.
+            - Analyze and understand the transcript in its original language.
+            - Do NOT translate during analysis.
+            - The final summary MUST be written in English.
+            
+            QUALITY SAFEGUARDS:
+            - If technical terms, code, product names, or proper nouns appear in another language, preserve them as-is.
+            - If parts of the transcript are unclear, corrupted, or incomplete, ignore them rather than guessing or inventing content.
             
             TASK:
             Analyze the following YouTube transcript and extract only the information that is important for understanding the video without watching it.
             
             OBJECTIVE:
-            Produce a concise, high-signal summary focused on meaning, not narration.
+            Produce a concise, high-signal English summary focused on meaning, not narration.
             
             INCLUDE:
             - Core topic(s)
@@ -84,7 +96,6 @@ public class OpenAIClient {
             RULES:
             - Do NOT invent information
             - Do NOT assume missing context
-            - Do NOT summarize emotions or tone
             - Do NOT refer to the transcript itself
             - Do NOT include timestamps
             - Do NOT include formatting symbols, bullets, or markdown
@@ -96,6 +107,7 @@ public class OpenAIClient {
             Be concise, dense, and information-focused.
             
             TRANSCRIPT:
-            """ + transcript;
+            %s
+            """.formatted(transcript.language(), transcript.content());
     }
 }

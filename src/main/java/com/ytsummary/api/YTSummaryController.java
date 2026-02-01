@@ -36,7 +36,7 @@ public class YTSummaryController {
 
         Transcript transcript = transcriptService.getTranscript(ytUrl);
 
-        String summary = summaryService.getSummary(transcript.content());
+        String summary = summaryService.getSummary(transcript);
 
         return ResponseEntity.ok(summary);
     }

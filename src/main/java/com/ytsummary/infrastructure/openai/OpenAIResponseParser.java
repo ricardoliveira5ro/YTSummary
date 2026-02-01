@@ -1,5 +1,6 @@
 package com.ytsummary.infrastructure.openai;
 
+import com.ytsummary.exception.OpenAIException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.stereotype.Component;
@@ -12,7 +13,7 @@ public class OpenAIResponseParser {
         JSONObject output = root.getJSONArray("output").getJSONObject(0);
 
         if (!output.getString("status").equalsIgnoreCase("completed")) {
-            throw new RuntimeException("Prompt not completed");
+            throw new OpenAIException("Prompt not completed");
         }
 
         JSONArray content = output.getJSONArray("content");
