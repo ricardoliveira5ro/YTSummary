@@ -1,5 +1,6 @@
 package com.ytsummary.infrastructure.openai;
 
+import com.ytsummary.exception.OpenAIException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -47,7 +48,7 @@ public class OpenAIClient {
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() >= 400)
-                throw new RuntimeException("Something went wrong");
+                throw new OpenAIException("YouTube request failed: " + response.statusCode());
 
             return response.body();
         } catch (Exception e) {
