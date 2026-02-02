@@ -1,11 +1,13 @@
 package com.ytsummary.api;
 
+import com.ytsummary.api.dto.SummaryDTO;
 import com.ytsummary.domain.model.Transcript;
 import com.ytsummary.domain.service.SummaryService;
 import com.ytsummary.domain.service.TranscriptService;
 import org.apache.logging.log4j.util.Strings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,6 +21,8 @@ public class YTSummaryController {
     private TranscriptService transcriptService;
     private SummaryService summaryService;
 
+    private final Logger logger = LoggerFactory.getLogger(YTSummaryController.class);
+
     @Autowired
     public void setTranscriptService(TranscriptService transcriptService) {
         this.transcriptService = transcriptService;
@@ -30,14 +34,20 @@ public class YTSummaryController {
     }
 
     @PostMapping("/summarize")
-    public ResponseEntity<String> summarize(@RequestParam(name = "ytUrl") String ytUrl) {
+    public ResponseEntity<SummaryDTO> summarize(@RequestParam(name = "ytUrl") String ytUrl) {
         if (Strings.isBlank(ytUrl))
-            return new ResponseEntity<>("Invalid URL", HttpStatus.BAD_REQUEST);
+            throw new RuntimeException("Invalid URL");
+
+        logger.info("Summary requested for {}", ytUrl);
 
         Transcript transcript = transcriptService.getTranscript(ytUrl);
 
         String summary = summaryService.getSummary(transcript);
 
-        return ResponseEntity.ok(summary);
+        String[] summaryResponse = summary.replace("\n\n", " ").split("(?i)keywords:\\s*");
+
+        logger.info("Summary successfully generated");
+
+        return ResponseEntity.ok(new SummaryDTO(summaryResponse[0], summaryResponse[1]));
     }
 }

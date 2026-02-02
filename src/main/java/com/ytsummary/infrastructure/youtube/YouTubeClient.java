@@ -2,6 +2,8 @@ package com.ytsummary.infrastructure.youtube;
 
 import com.ytsummary.exception.YoutubeException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -14,6 +16,7 @@ import java.net.http.HttpResponse;
 public class YouTubeClient {
 
     private HttpClient httpClient;
+    private final Logger logger = LoggerFactory.getLogger(YouTubeClient.class);
 
     @Autowired
     public void setHttpClient(HttpClient httpClient) {
@@ -21,6 +24,8 @@ public class YouTubeClient {
     }
 
     public String fetchVideo(String ytUrl) {
+        logger.info("Fetching video");
+
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(ytUrl))
                 .GET()
@@ -30,6 +35,8 @@ public class YouTubeClient {
     }
 
     public String fetchPlayerData(String apiKey, String videoId) {
+        logger.info("Fetching player data");
+
         JSONObject payload = new JSONObject()
                 .put("context", new JSONObject()
                         .put("client", new JSONObject()
@@ -47,6 +54,8 @@ public class YouTubeClient {
     }
 
     public String fetchCaptions(String captionsUrl) {
+        logger.info("Fetching captions");
+
          HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(captionsUrl))
                 .GET()
@@ -57,6 +66,8 @@ public class YouTubeClient {
 
     private String invokeRequest(HttpRequest request) {
         try {
+            logger.info("Invoking request {}", request.uri().toString());
+
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() >= 400)
