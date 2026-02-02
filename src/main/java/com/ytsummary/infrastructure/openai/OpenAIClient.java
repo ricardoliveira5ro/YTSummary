@@ -77,7 +77,7 @@ public class OpenAIClient {
             OBJECTIVE:
             Produce a concise, high-signal English summary focused on meaning, not narration.
             
-            INCLUDE:
+            INCLUDE IN SUMMARY:
             - Core topic(s)
             - Main arguments or ideas
             - Key insights or conclusions
@@ -85,6 +85,13 @@ public class OpenAIClient {
             - Actionable takeaways (if any)
             - Definitions of critical concepts (if introduced)
             - Decisions, recommendations, or opinions expressed by the speaker
+            
+            KEYWORDS REQUIREMENTS:
+            - Extract 5–12 keywords or short key phrases.
+            - Keywords must represent the most important concepts, technologies, methods, or themes.
+            - Prefer specific and meaningful terms over generic ones.
+            - Preserve original-language technical terms, product names, or proper nouns.
+            - Avoid duplicates, filler terms, or overly broad words.
             
             EXCLUDE:
             - Filler words, repetition, greetings, jokes, banter
@@ -97,14 +104,21 @@ public class OpenAIClient {
             - Do NOT invent information
             - Do NOT assume missing context
             - Do NOT refer to the transcript itself
+            - Do NOT use "The transcript"
             - Do NOT include timestamps
             - Do NOT include formatting symbols, bullets, or markdown
             
             OUTPUT FORMAT:
             Plain text only.
-            Structured as short, clear paragraphs.
-            Each paragraph should represent one main idea.
-            Be concise, dense, and information-focused.
+            
+            SUMMARY REQUIREMENTS:
+            - Structured as short, clear paragraphs.
+            - Each paragraph should represent one main idea.
+            - Be concise, dense, and information-focused.
+            
+            Then, provide the keywords:
+            - On a new line, start with: Keywords:
+            - List the keywords separated by commas
             
             TRANSCRIPT:
             %s
