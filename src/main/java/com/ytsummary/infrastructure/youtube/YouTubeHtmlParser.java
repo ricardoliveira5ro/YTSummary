@@ -2,6 +2,8 @@ package com.ytsummary.infrastructure.youtube;
 
 import com.ytsummary.exception.InvalidUrlException;
 import com.ytsummary.exception.YoutubeException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.net.URI;
@@ -12,13 +14,18 @@ import java.util.regex.Pattern;
 public class YouTubeHtmlParser {
 
     private static final Pattern API_KEY_PATTERN = Pattern.compile("\"INNERTUBE_API_KEY\":\"([^\"]+)\"");
+    private final Logger logger = LoggerFactory.getLogger(YouTubeHtmlParser.class);
 
     public String parseApiKey(String html) {
         Matcher matcher = API_KEY_PATTERN.matcher(html);
         if (!matcher.find())
             throw new YoutubeException("INNERTUBE_API_KEY not found");
 
-        return matcher.group(1);
+        String key = matcher.group(1);
+
+        logger.info("Key {} parsed", key);
+
+        return key;
     }
 
     public String parseVideoId(String ytUrl) {
@@ -31,6 +38,7 @@ public class YouTubeHtmlParser {
         for (String param : query.split("&")) {
             String[] pair = param.split("=", 2);
             if ("v".equals(pair[0])) {
+                logger.info("Video id {} parsed", pair[1]);
                 return pair[1];
             }
         }

@@ -4,6 +4,8 @@ import com.ytsummary.exception.TranscriptNotFoundException;
 import org.apache.commons.text.StringEscapeUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
@@ -14,6 +16,8 @@ import java.io.StringReader;
 
 @Component
 public class YouTubeCaptionParser {
+
+    private final Logger logger = LoggerFactory.getLogger(YouTubeCaptionParser.class);
 
     public JSONObject parseTrack(String playerResponse) {
         JSONObject root = new JSONObject(playerResponse);
@@ -27,16 +31,25 @@ public class YouTubeCaptionParser {
 
         for (int i = 0; i < tracks.length(); i++) {
             JSONObject track = tracks.getJSONObject(i);
-            if ("en".equals(track.getString("languageCode"))) {
+            String language = track.getString("languageCode");
+
+            if ("en".equalsIgnoreCase(language)) {
+                logger.info("EN track found");
                 return track;
             }
         }
+
+        logger.info("Track auto-detected language found");
 
         return tracks.getJSONObject(0);
     }
 
     public String parseCaptionsUrl(JSONObject track) {
-        return track.getString("baseUrl").replaceAll("&fmt=\\w+$", "");
+        String captionsUrl = track.getString("baseUrl").replaceAll("&fmt=\\w+$", "");
+
+        logger.info("Captions URL {}", captionsUrl);
+
+        return captionsUrl;
     }
 
     public String parseCaptions(String xml) {
@@ -56,6 +69,8 @@ public class YouTubeCaptionParser {
                     transcript.append(StringEscapeUtils.unescapeHtml4(text)).append(' ');
                 }
             }
+
+            logger.info("Transcript parsed successfully");
 
             return transcript.toString().trim();
 

@@ -3,6 +3,8 @@ package com.ytsummary.infrastructure.openai;
 import com.ytsummary.domain.model.Transcript;
 import com.ytsummary.exception.OpenAIException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -24,12 +26,16 @@ public class OpenAIClient {
     @Value("${openai.api-model}")
     private String openAIApiModel;
 
+    private final Logger logger = LoggerFactory.getLogger(OpenAIClient.class);
+
     @Autowired
     public void setHttpClient(HttpClient httpClient) {
         this.httpClient = httpClient;
     }
 
     public String fetchPromptRequest(Transcript transcript) {
+        logger.info("Fetching AI model response");
+
         JSONObject payload = new JSONObject()
                 .put("model", openAIApiModel)
                 .put("input", getPrompt(transcript));
@@ -46,6 +52,8 @@ public class OpenAIClient {
 
     private String invokeRequest(HttpRequest request) {
         try {
+            logger.info("Invoking request {}", request.uri().toString());
+
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() >= 400)
