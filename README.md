@@ -38,6 +38,28 @@ Output example
 }
 ```
 
+## 👨🏼‍💻 Technical Flow
+
+API layer
+
+* The client sends a `POST /api/summarize?ytUrl=<URL>` request.
+* `YTSummaryController` is responsible for validating the URL and mapping request parameters to DTOs
+
+Retrieve transcript
+
+* Fetch YouTube video metadata 
+* Extract INNERTUBE_API_KEY from the video page 
+* Call the YouTube player endpoint `https://www.youtube.com/youtubei/v1/player`
+* Parse the response to retrieve the captions URL 
+* Fetch captions or auto-generated transcript 
+* Normalize and store transcript content and detected language
+
+Summarization via LLM
+
+* Build prompt message using transcript
+* Send requests to the OpenAI API
+* Parse raw responses into structured summary
+
 ## 📁 Project Structure
 
 ```
