@@ -15,7 +15,7 @@ public class SummaryService {
         this.summaryProvider = summaryProvider;
     }
 
-    public String getSummary(Transcript transcript) {
-        return summaryProvider.getSummary(transcript);
+    public String getSummary(Transcript transcript, String context) {
+        return summaryProvider.getSummary(transcript, context);
     }
 }

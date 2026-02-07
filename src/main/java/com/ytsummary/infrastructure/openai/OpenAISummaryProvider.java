@@ -22,8 +22,8 @@ public class OpenAISummaryProvider implements SummaryProvider {
     }
 
     @Override
-    public String getSummary(Transcript transcript) {
-        String response = openAIClient.fetchPromptRequest(transcript);
+    public String getSummary(Transcript transcript, String context) {
+        String response = openAIClient.fetchPromptRequest(transcript, context);
 
         return openAIResponseParser.parseOpenAIResponse(response);
     }
