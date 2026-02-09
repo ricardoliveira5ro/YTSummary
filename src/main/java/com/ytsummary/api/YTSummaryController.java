@@ -1,5 +1,6 @@
 package com.ytsummary.api;
 
+import com.ytsummary.api.dto.ContextRequestDTO;
 import com.ytsummary.api.dto.SummaryDTO;
 import com.ytsummary.domain.model.Transcript;
 import com.ytsummary.domain.service.SummaryService;
@@ -9,10 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api")
@@ -34,7 +32,7 @@ public class YTSummaryController {
     }
 
     @PostMapping("/summarize")
-    public ResponseEntity<SummaryDTO> summarize(@RequestParam(name = "ytUrl") String ytUrl) {
+    public ResponseEntity<SummaryDTO> summarize(@RequestParam(name = "ytUrl") String ytUrl, @RequestBody ContextRequestDTO contextRequestDTO) {
         if (Strings.isBlank(ytUrl))
             throw new RuntimeException("Invalid URL");
 
@@ -42,7 +40,7 @@ public class YTSummaryController {
 
         Transcript transcript = transcriptService.getTranscript(ytUrl);
 
-        String summary = summaryService.getSummary(transcript);
+        String summary = summaryService.getSummary(transcript, contextRequestDTO.context());
 
         String[] summaryResponse = summary.replace("\n\n", " ").split("(?i)keywords:\\s*");
 

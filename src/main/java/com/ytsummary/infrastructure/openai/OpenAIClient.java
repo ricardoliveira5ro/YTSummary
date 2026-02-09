@@ -33,12 +33,12 @@ public class OpenAIClient {
         this.httpClient = httpClient;
     }
 
-    public String fetchPromptRequest(Transcript transcript) {
+    public String fetchPromptRequest(Transcript transcript, String context) {
         logger.info("Fetching AI model response");
 
         JSONObject payload = new JSONObject()
                 .put("model", openAIApiModel)
-                .put("input", getPrompt(transcript));
+                .put("input", getPrompt(transcript, context));
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create("https://api.openai.com/v1/responses"))
@@ -65,7 +65,16 @@ public class OpenAIClient {
         }
     }
 
-    private String getPrompt(Transcript transcript) {
+    private String getPrompt(Transcript transcript, String context) {
+        String contextSection = context != null && !context.isBlank() ? """
+                ADDITIONAL CONTEXT (provided by the user):
+                - Use this context only to guide emphasis and interpretation.
+                - Do NOT treat it as factual information unless confirmed by the transcript.
+                
+                CONTEXT:
+                %s
+                """.formatted(context) : "";
+
         return """
             You are an intelligent content analysis system.
             
@@ -127,9 +136,14 @@ public class OpenAIClient {
             Then, provide the keywords:
             - On a new line, start with: Keywords:
             - List the keywords separated by commas
+            %s
             
             TRANSCRIPT:
             %s
-            """.formatted(transcript.language(), transcript.content());
+        """.formatted(
+                transcript.language(),
+                contextSection,
+                transcript.content()
+        );
     }
 }
